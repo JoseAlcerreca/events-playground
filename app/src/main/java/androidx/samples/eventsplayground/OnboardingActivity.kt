@@ -3,6 +3,7 @@ package androidx.samples.eventsplayground
 import android.os.Bundle
 import android.provider.ContactsContract.Profile
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material.Button
@@ -33,7 +34,8 @@ class OnboardingActivity : ComponentActivity() {
 
                         val shouldSkip by viewModel.shouldShowOnboarding.collectAsState()
                         LaunchedEffect(shouldSkip) {
-                            if (shouldSkip) navController.navigate("main")
+                            if (shouldSkip) {
+                                navController.navigate("main") }
 
                         }
                         Greeting("Onboarding") {
@@ -41,7 +43,13 @@ class OnboardingActivity : ComponentActivity() {
                         }
 
                     }
-                    composable("main") { Greeting("Main") }
+                    composable("main") {
+
+                        BackHandler {
+                            this@OnboardingActivity.finish()
+                        }
+                        Greeting("Main")
+                    }
                 }
             }
         }
