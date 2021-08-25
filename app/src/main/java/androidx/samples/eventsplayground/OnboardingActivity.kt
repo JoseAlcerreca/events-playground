@@ -34,6 +34,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.samples.eventsplayground.ui.theme.EventsPlaygroundTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 class OnboardingActivity : AppCompatActivity() {
 
@@ -47,7 +49,7 @@ class OnboardingActivity : AppCompatActivity() {
                 NavHost(navController = navController, startDestination = "onboarding") {
                     composable("onboarding") {
 
-                        val shouldSkip by viewModel.shouldShowOnboarding.collectAsState()
+                        val shouldSkip by viewModel.isOnboardingCompleted.collectAsState()
                         LaunchedEffect(shouldSkip) {
                             if (shouldSkip) {
                                 navController.navigate("main")
@@ -63,9 +65,17 @@ class OnboardingActivity : AppCompatActivity() {
                         // However, if you rotate the screen in the log in activity, this Onboarding
                         // activity is recreated when coming back to it, starting the LoginActivity
                         // again.
-                        val shouldLogIn by viewModel.shouldLogIn.collectAsState()
+                        val shouldLogIn by viewModel.isLogInShown.collectAsState()
                         LaunchedEffect(shouldLogIn) {
                             if (shouldLogIn) {
+                                // We can't reset this the same way we did viewModel.skip():
+
+                                //viewModel.loginInitiated()  // <-- this cancels this coroutine
+                                // because it changes shouldLogIn, so it's racy. It can be made
+                                // reliable if you do:
+                                delay(200)
+                                if (!isActive) return@LaunchedEffect
+
                                 startActivity(
                                     Intent(this@OnboardingActivity, LoginActivity::class.java)
                                 )

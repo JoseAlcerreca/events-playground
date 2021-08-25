@@ -21,11 +21,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class OnboardingViewModel : ViewModel() {
 
-    val shouldShowOnboarding = MutableStateFlow(false)
-    val shouldLogIn = MutableStateFlow(true) // Coming from an auth manager or something.
+    val isOnboardingCompleted = MutableStateFlow(false)
+
+    // This is an event coming from an auth manager, async.
+    // It should start the login process but the user can press back to cancel it.
+    val isLogInShown = MutableStateFlow(true)
 
     fun skip() {
-        shouldShowOnboarding.value = true
+        isOnboardingCompleted.value = true
+    }
+
+    // Not used because it's an antipattern, and the whole point of this repro.
+    fun loginInitiated() {
+        isLogInShown.value = false
     }
 
 }
