@@ -1,18 +1,33 @@
+/*
+ * Copyright 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package androidx.samples.eventsplayground
 
+import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract.Profile
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
@@ -20,9 +35,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.samples.eventsplayground.ui.theme.EventsPlaygroundTheme
 
-class OnboardingActivity : ComponentActivity() {
+class OnboardingActivity : AppCompatActivity() {
 
-    val viewModel: SharedViewModel by viewModels()
+    val viewModel: OnboardingViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,20 +50,31 @@ class OnboardingActivity : ComponentActivity() {
                         val shouldSkip by viewModel.shouldShowOnboarding.collectAsState()
                         LaunchedEffect(shouldSkip) {
                             if (shouldSkip) {
-                                navController.navigate("main") }
-
+                                navController.navigate("main")
+                            }
                         }
-                        Greeting("Onboarding") {
+                        Greeting("Skip onboarding") {
                             viewModel.skip()
                         }
-
                     }
                     composable("main") {
-
+                        // If kept in the back stack, this doesn't receive a change so when pressing
+                        // back from the login activity, it works correctly.
+                        // However, if you rotate the screen in the log in activity, this Onboarding
+                        // activity is recreated when coming back to it, starting the LoginActivity
+                        // again.
+                        val shouldLogIn by viewModel.shouldLogIn.collectAsState()
+                        LaunchedEffect(shouldLogIn) {
+                            if (shouldLogIn) {
+                                startActivity(
+                                    Intent(this@OnboardingActivity, LoginActivity::class.java)
+                                )
+                            }
+                        }
                         BackHandler {
                             this@OnboardingActivity.finish()
                         }
-                        Greeting("Main")
+                        Text("Main")
                     }
                 }
             }

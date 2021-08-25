@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    ext {
-        compose_version = '1.0.1'
-    }
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "com.android.tools.build:gradle:7.0.1"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21"
+package androidx.samples.eventsplayground
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+
+class OnboardingViewModel : ViewModel() {
+
+    val shouldShowOnboarding = MutableStateFlow(false)
+    val shouldLogIn = MutableStateFlow(true) // Coming from an auth manager or something.
+
+    fun skip() {
+        shouldShowOnboarding.value = true
     }
+
 }
+class LoginViewModel : ViewModel() {
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    val shouldShowOnboarding = MutableStateFlow(false)
+
+    fun skip() {
+        shouldShowOnboarding.value = true
+    }
+
 }
